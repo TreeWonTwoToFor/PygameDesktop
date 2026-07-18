@@ -12,7 +12,7 @@ clicking = False
 pygame.font.init()
 font_size = 24
 line_gap = 3
-font = pygame.font.Font("../Comfortaa.ttf", font_size)
+font = pygame.font.Font("Comfortaa.ttf", font_size)
 text_color = (0,0,0)
 
 symbol_key_dict = {

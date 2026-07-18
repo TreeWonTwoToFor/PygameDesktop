@@ -8,7 +8,7 @@ os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 pygame.init()
 pygame.display.set_caption("D&D Desktop")
-font = pygame.font.Font("../Comfortaa.ttf", 20)
+font = pygame.font.Font("Comfortaa.ttf", 20)
 
 debug = False
 clicking = False

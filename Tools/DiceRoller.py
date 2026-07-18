@@ -10,7 +10,7 @@ clicking = False
 
 pygame.font.init()
 font_size = 50
-font = pygame.font.Font("../Comfortaa.ttf", font_size)
+font = pygame.font.Font("Comfortaa.ttf", font_size)
 text_color = (255,255,255)
 button_color = (50,50,50)
 
