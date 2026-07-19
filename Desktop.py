@@ -118,20 +118,18 @@ class Desktop:
     def logic(self):
         global debug, clicking
         # handling the pygame events 
-        # FIXME: only will handle the first of the seen events, as it'll just return out
+        output = []
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
-                    return "stop"
+                    output.append("stop")
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        return "stop"
-                    #elif event.key == pygame.K_SPACE:
-                    #    debug = not debug
+                        output.append("stop")
                     else:
-                        return ["keyboard down", (pygame.key.name(event.key), self.focused_window)]
+                        output.append(["keyboard down", (pygame.key.name(event.key), self.focused_window)])
                 case pygame.KEYUP:
-                    return ["keyboard up", (pygame.key.name(event.key), self.focused_window)]
+                    output.append(["keyboard up", (pygame.key.name(event.key), self.focused_window)])
                 case pygame.MOUSEBUTTONDOWN:
                     clicking = True
                 case pygame.MOUSEBUTTONUP:
@@ -140,7 +138,7 @@ class Desktop:
                     for app in self.application_order:
                         window = self.window_dict[app]
                         window.normalize()
-                    return ["mouse", ("not clicking", self.focused_window)]
+                    output.append(["mouse", ("not clicking", self.focused_window)])
         # handling mouse interactions
         if clicking:
             mouse_buttons = pygame.mouse.get_pressed()
@@ -148,11 +146,12 @@ class Desktop:
             clicking = self.taskbar_clicking_logic(mouse_buttons, cursor_position, clicking)
             clicking, instruction = self.dropdown_clicking_logic(mouse_buttons, cursor_position, clicking)
             if instruction is not None:
-                return instruction
+                output.append(instruction)
             # general sceen space
-            if self.inside_screen(cursor_position) and clicking:
+            elif self.inside_screen(cursor_position) and clicking:
                 self.dropdown_list = []
-                return self.window_clicking_logic(mouse_buttons, cursor_position)
+                output.append(self.window_clicking_logic(mouse_buttons, cursor_position))
+        return output
 
     def taskbar_clicking_logic(self, mouse_buttons, cursor_position, clicking):
         if self.inside_taskbar(cursor_position):

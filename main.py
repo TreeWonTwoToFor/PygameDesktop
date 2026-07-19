@@ -45,30 +45,31 @@ def main():
     update_tools()
     running = True
     while running:
-        instruction = desktop.logic()
-        if instruction == "stop":
-            running = False
-            continue
-        elif instruction is not None:
-            if instruction[0].split(" ")[0] in ["mouse", "keyboard"]:
-                # give user input over to update
-                update_tools(instruction)
-            else:
-                parent_app, app_instruction = instruction
-                if type(app_instruction) == str and app_instruction.split(' ')[0] == "Close":
-                    close_tool(parent_app)
-                else:
-                    match parent_app:
-                        case "Desktop":
-                            # we know that it's always going to be an open, until we decide to add more desktop options
-                            app_name = app_instruction.split(" ")[-1]
-                            load_tool(app_name)
-                        case _:
-                            # we can just feed the app the dropdown option that's been selected
-                            run_tool(parent_app, [app_instruction, [parent_app]])
-        else:
+        instructions = desktop.logic()
+        if len(instructions) == 0:
             # just do a nomral rerun of all tools for their frames
             update_tools()
+        elif "stop" in instructions:
+            running = False
+        else:
+            for instruction in instructions:
+                if instruction is not None:
+                    if instruction[0].split(" ")[0] in ["mouse", "keyboard"]:
+                        # give user input over to update
+                        update_tools(instruction)
+                    else:
+                        parent_app, app_instruction = instruction
+                        if type(app_instruction) == str and app_instruction.split(' ')[0] == "Close":
+                            close_tool(parent_app)
+                        else:
+                            match parent_app:
+                                case "Desktop":
+                                    # we know that it's always going to be an open, until we decide to add more desktop options
+                                    app_name = app_instruction.split(" ")[-1]
+                                    load_tool(app_name)
+                                case _:
+                                    # we can just feed the app the dropdown option that's been selected
+                                    run_tool(parent_app, [app_instruction, [parent_app]])
         desktop.draw()
         desktop.clock.tick(desktop.fps)
 
