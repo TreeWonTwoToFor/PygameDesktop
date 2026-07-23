@@ -23,7 +23,14 @@ Here's a list of ideas for apps that I want to have as options.
         4. plains/grasslands
 4. NPC information holder/tracker
 5. notepad for writing down information ✓
-    a. it's very basic as of right now, but it does work. should be improved with multi-event handling
+    a. it's very basic as of right now, but it does work. should be improved with multi-event handling ✓
+6. Media playback features
+    a. Image Viewer ✓
+    b. Video player
+        1. Seems like there's some good open source options that I can use, rather than homebrewing my own.
+    c. Audio player
+        1. just use pygame's built in library, and have a simple UI for playback
 
 Desktop improvements:
-1. being able to handle multiple events at once, as it currently just returns out on most events
+1. being able to handle multiple events at once, as it currently just returns out on most events ✓
+    a. now can handle multiple events through creating a list, and handing that off to each application.
