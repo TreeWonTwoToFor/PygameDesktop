@@ -1,15 +1,20 @@
 import os
 
-from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, DefaultTool, InitiativeTracker
+from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker
 from Desktop import Desktop
 
 media_dir = "./media/"
 media_files = [f for f in os.listdir(media_dir) if os.path.isfile(os.path.join(media_dir, f))]
 sound_files, image_files, video_files = [], [], []
 for file in media_files:
-    if file.split('.')[-1] in ["png", "jpg", "gif"]:
-        file_path = media_dir + file
-        image_files.append(file_path)
+    file_ext = file.split('.')[-1]
+    match file_ext:
+        case "png" | "jpg" | "gif":
+            file_path = media_dir + file
+            image_files.append(file_path)
+        case "mp3" | "wav":
+            file_path = media_dir + file
+            sound_files.append(file_path)
 
 possible_tools = {
     "BattleMap": {
@@ -26,9 +31,13 @@ possible_tools = {
         "dropdown": ["Close TextEditor"]
     },
     "ImageViewer": {
-            "module": ImageViewer,
-            "dropdown": image_files + ["Close ImageViewer"]
-        }
+        "module": ImageViewer,
+        "dropdown": image_files + ["Close ImageViewer"]
+    },
+    "AudioPlayer": {
+        "module": AudioPlayer,
+        "dropdown": sound_files + ["Close AudioPlayer"]
+    },
     # "DefaultTool": {
     #     "module": DefaultTool,
     #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"]

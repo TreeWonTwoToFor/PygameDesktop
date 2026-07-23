@@ -46,10 +46,3 @@ def logic(event_type, event_details):
                 case _:
                     image_path = event_type
                     image = pygame.image.load(image_path)
-
-def inside_rect(rectangle, xy):
-    x, y = xy[0], xy[1]
-    if x >= rectangle.left and x <= rectangle.right:
-        if y >= rectangle.top and y <= rectangle.bottom:
-            return True
-    return False
