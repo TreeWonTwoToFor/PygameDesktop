@@ -1,9 +1,15 @@
-from Tools import DiceRoller
-from Tools import BattleMap
-from Tools import DefaultTool
-from Tools import InitiativeTracker
-from Tools import TextEditor
+import os
+
+from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, DefaultTool, InitiativeTracker
 from Desktop import Desktop
+
+media_dir = "./media/"
+media_files = [f for f in os.listdir(media_dir) if os.path.isfile(os.path.join(media_dir, f))]
+sound_files, image_files, video_files = [], [], []
+for file in media_files:
+    if file.split('.')[-1] in ["png", "jpg", "gif"]:
+        file_path = media_dir + file
+        image_files.append(file_path)
 
 possible_tools = {
     "BattleMap": {
@@ -19,6 +25,10 @@ possible_tools = {
         "module": TextEditor,
         "dropdown": ["Close TextEditor"]
     },
+    "ImageViewer": {
+            "module": ImageViewer,
+            "dropdown": image_files + ["Close ImageViewer"]
+        }
     # "DefaultTool": {
     #     "module": DefaultTool,
     #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"]
@@ -28,7 +38,6 @@ possible_tools = {
     #     "dropdown": ["Close InitiativeTracker"]
     # }
 }
-
 tools = []
 
 def init():
@@ -39,7 +48,6 @@ def init():
     for tool in initial_tools:
         load_tool(tool)
     desktop.application_order.reverse()
-    desktop.tool_reference_table = possible_tools
 
 def main():
     update_tools()
