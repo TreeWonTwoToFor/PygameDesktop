@@ -136,8 +136,9 @@ def logic(event_type, event_details):
                     text_list.pop()
                 else:
                     if "left ctrl" in held_keys or "right ctrl" in held_keys:
-                        num_chars = len(text_list[-1].split(" ")[-1]) + 1
-                        text_list[-1] = text_list[-1][:-num_chars]
+                        num_chars = len(text_list[-1].split(" ")[-1])
+                        if num_chars != 0:
+                            text_list[-1] = text_list[-1][:-num_chars]
                     else:
                         text_list[-1] = text_list[-1][:-1]
             case "space":

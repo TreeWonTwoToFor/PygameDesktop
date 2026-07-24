@@ -43,7 +43,7 @@ class Desktop:
 
     def open_app(self, application_name):
         self.request_window(application_name)
-        self.application_order.append(application_name)
+        self.application_order.insert(0, application_name)
         
     def close_app(self, application_name):
         self.application_order.remove(application_name)
