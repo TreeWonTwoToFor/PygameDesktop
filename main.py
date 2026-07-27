@@ -110,8 +110,6 @@ def load_tool(tool_name):
         desktop.load_icon(tool_id)
     desktop.open_app(tool_id)
     desktop.tool_list.append(tool_instance)
-    # run initialization for that tool
-    # tool_info["module"].run_once()
     tool_id += 1
 
 def close_tool(tool_id):

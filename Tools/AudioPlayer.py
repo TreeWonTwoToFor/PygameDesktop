@@ -19,7 +19,6 @@ play_button = pygame.image.load("./icons/play_button.png")
 pause_button = pygame.image.load("./icons/pause_button.png")
 
 def run_once():
-    # global playing, button_list, audio_path
     playing = False
     # default audio setup
     audio_path = "./media/Raison Detre.mp3"
@@ -54,7 +53,6 @@ def draw(canvas, state, logic_output):
         button_pos[0] += button.get_rect()[0] + offset
 
 def logic(event_type, event_details, id, state, canvas):
-    # global clicking, playing, button_list
     global clicking
     playing, audio_path, button_list = state
     no_output = None, state
@@ -68,7 +66,6 @@ def logic(event_type, event_details, id, state, canvas):
             else:
                 buttons_pressed = event_details[0]
                 mouse_pos = event_details[1]
-                # print("Default tool event details:", event_details)
                 if not mouse_in_window(canvas, mouse_pos):
                     return no_output
                 # otherwise, perform mouse logic

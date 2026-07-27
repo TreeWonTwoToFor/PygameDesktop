@@ -19,22 +19,16 @@ palette_dict = {
 }
 
 def run_once():
-    # NOTE: add a return for the state
-    # state defining the state
     shape_option = "rectangle"
     color_palette = "stone"
     return [shape_option, color_palette] 
 
-# def run(window_dict, desktop_instruction):
 def run(id, state, canvas, desktop_instruction):
-    # NOTE: param 1 is state, 2 is canvas instead of window dict
-    # canvas = window_dict[application_name].surface
     if desktop_instruction is not None:
         event_type, event_details = desktop_instruction[0], desktop_instruction[1]
     else:
         event_type = None
         event_details = [None]
-    # NOTE: give logic the state, draw the canvas, and return the state
     x = logic(event_type, event_details, id, state, canvas)
     if x is not None:
         state = x
@@ -66,7 +60,6 @@ def logic(event_type, event_details, id, state, canvas):
             else:
                 buttons_pressed = event_details[0]
                 mouse_pos = event_details[1]
-                # print("Default tool event details:", event_details)
                 if not mouse_in_window(canvas, mouse_pos):
                     return
                 # otherwise, perform mouse logic

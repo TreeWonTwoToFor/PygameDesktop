@@ -28,8 +28,8 @@ Here's a list of ideas for apps that I want to have as options.
     a. Image Viewer ✓
     b. Video player
         1. Seems like there's some good open source options that I can use, rather than homebrewing my own.
-    c. Audio player
-        1. just use pygame's built in library, and have a simple UI for playback
+    c. Audio player ✓
+        1. needs a slightly better ui
 
 Desktop improvements:
 1. being able to handle multiple events at once, as it currently just returns out on most events ✓

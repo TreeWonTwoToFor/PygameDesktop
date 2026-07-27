@@ -37,7 +37,6 @@ def logic(event_type, event_details, id, state, canvas):
             else:
                 buttons_pressed = event_details[0]
                 mouse_pos = event_details[1]
-                # print("Default tool event details:", event_details)
                 if not mouse_in_window(canvas, mouse_pos):
                     return no_output
                 # otherwise, perform mouse logic
