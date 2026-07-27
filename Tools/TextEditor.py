@@ -5,7 +5,6 @@ application_name = "TextEditor"
 application_icon = "./icons/notepad_icon.png"
 
 background_color = (255,255,255)
-canvas = None
 
 clicking = False
 
@@ -40,23 +39,25 @@ symbol_key_dict = {
 
 def run_once():
     # any initialization should go in there, in order to keep the state fresh every time the tool is opened.
-    global text_list, held_keys, delayed_auto_type
+    # global text_list, held_keys, delayed_auto_type
     text_list = [""]
     held_keys = []
+    old_held_keys = []
     delayed_auto_type = 0
+    state = [text_list, held_keys, old_held_keys, delayed_auto_type]
+    return state
 
-def run(window_dict, desktop_instruction):
-    global canvas
-    canvas = window_dict[application_name].surface
+def run(id, state, canvas, desktop_instruction):
     if desktop_instruction is not None:
         event_type, event_details = desktop_instruction[0], desktop_instruction[1]
     else:
         event_type = None
         event_details = [None]
-    logic_output = logic(event_type, event_details)
-    draw(logic_output)
+    logic_output, state = logic(event_type, event_details, id, state, canvas)
+    draw(canvas, state, logic_output)
 
-def draw(logic_output):
+def draw(canvas, state, logic_output):
+    text_list = state[0]
     canvas.fill(background_color)
     line_height = 10
     text = None
@@ -71,10 +72,14 @@ def draw(logic_output):
     else:
         canvas.blit(cursor, (10, 10))
 
-def logic(event_type, event_details):
-    global clicking, text_list, held_keys, old_held_keys, delayed_auto_type
+def logic(event_type, event_details, id, state, canvas):
+    # global clicking, text_list, held_keys, old_held_keys, delayed_auto_type
+    global clicking
+    text_list, held_keys, old_held_keys, delayed_auto_type = state
+    no_output = None, state
+    output = None
     old_held_keys = copy.deepcopy(held_keys)
-    if event_details[-1] == application_name:
+    if event_details[-1] == id:
         match event_type:
             case "mouse":
                 if event_details[0] == "not clicking":
@@ -83,8 +88,8 @@ def logic(event_type, event_details):
                     buttons_pressed = event_details[0]
                     mouse_pos = event_details[1]
                     # print("Default tool event details:", event_details)
-                    if not mouse_in_window(mouse_pos):
-                        return None
+                    if not mouse_in_window(canvas, mouse_pos):
+                        return no_output
                     # otherwise, perform mouse logic
                     if not clicking: # is this the initial click?
                         pass
@@ -131,7 +136,7 @@ def logic(event_type, event_details):
                 text_list.append("")
             case "backspace":
                 if len(text_list) == 1 and len(text_list[0]) == 0:
-                    return
+                    return no_output
                 if len(text_list[-1]) == 0:
                     text_list.pop()
                 else:
@@ -156,7 +161,10 @@ def logic(event_type, event_details):
                         else:
                             text_list[-1] = text_list[-1] + symbol_key_dict[key_pressed]
 
-def mouse_in_window(mouse_position):
+    state = [text_list, held_keys, old_held_keys, delayed_auto_type]
+    return output, state
+
+def mouse_in_window(canvas, mouse_position):
     canvas_size = canvas.get_size()
     if mouse_position[0] > 0 and mouse_position[0] <= canvas_size[0]:
         if mouse_position[1] > 0 and mouse_position[1] <= canvas_size[1]:

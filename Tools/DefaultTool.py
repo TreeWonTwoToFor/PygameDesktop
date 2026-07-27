@@ -2,32 +2,34 @@ application_name = "DefaultTool"
 application_icon = "./icons/default_icon.png"
 
 background_color = (255,255,255)
-canvas = None
 
 clicking = False
 
 def run_once():
     # any initialization should go in there, in order to keep the state fresh every time the tool is opened.
-    pass
+    state = []
+    return state
 
-def run(window_dict, desktop_instruction):
-    global canvas
-    canvas = window_dict[application_name].surface
+def run(id, state, canvas, desktop_instruction):
     if desktop_instruction is not None:
         event_type, event_details = desktop_instruction[0], desktop_instruction[1]
     else:
         event_type = None
         event_details = [None]
-    logic_output = logic(event_type, event_details)
-    draw(logic_output)
+    logic_output, state = logic(event_type, event_details, id, state, canvas)
+    draw(canvas, state, logic_output)
+    return state
 
-def draw(logic_output):
+def draw(canvas, state, logic_output):
     canvas.fill(background_color)
 
-def logic(event_type, event_details):
+def logic(event_type, event_details, id, state, canvas):
     global clicking
-    if event_details[-1] != application_name:
-        return
+    no_output = None, state
+    output = None
+    # keep track of the state throughout the logic
+    if event_details[-1] != id:
+        return no_output
     match event_type:
         case "mouse":
             if event_details[0] == "not clicking":
@@ -36,8 +38,8 @@ def logic(event_type, event_details):
                 buttons_pressed = event_details[0]
                 mouse_pos = event_details[1]
                 # print("Default tool event details:", event_details)
-                if not mouse_in_window(mouse_pos):
-                    return None
+                if not mouse_in_window(canvas, mouse_pos):
+                    return no_output
                 # otherwise, perform mouse logic
                 if not clicking: # is this the initial click?
                     print("Buttons and pos:", buttons_pressed, mouse_pos)
@@ -59,8 +61,9 @@ def logic(event_type, event_details):
             match event_type:
                 case _:
                     print("Event called:", event_type)
+    return output, state
 
-def mouse_in_window(mouse_position):
+def mouse_in_window(canvas, mouse_position):
     canvas_size = canvas.get_size()
     if mouse_position[0] > 0 and mouse_position[0] <= canvas_size[0]:
         if mouse_position[1] > 0 and mouse_position[1] <= canvas_size[1]:

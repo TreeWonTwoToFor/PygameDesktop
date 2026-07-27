@@ -1,7 +1,10 @@
 import os
 
+from Tools.App import App
 from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker
 from Desktop import Desktop
+
+tool_id = 0
 
 media_dir = "./media/"
 media_files = [f for f in os.listdir(media_dir) if os.path.isfile(os.path.join(media_dir, f))]
@@ -16,31 +19,32 @@ for file in media_files:
             file_path = media_dir + file
             sound_files.append(file_path)
 
+dice_list = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"]
+
 possible_tools = {
     "BattleMap": {
         "module": BattleMap,
-        "dropdown": [["Shape >", "Rectangle", "Circle"], ["Palette >", "Stone", "Paper", "Forest"], "Close BattleMap"]
+        "dropdown": [["Shape >", "Rectangle", "Circle"], ["Palette >", "Stone", "Paper", "Forest"], "Close BattleMap"],
     }, 
     "DiceRoller": {
         "module": DiceRoller,
-        "dropdown": [["Add Dice >", "d4", "d6", "d8", "d10", "d12", "d20"], 
-                     ["Remove Dice >", "d4", "d6", "d8", "d10", "d12", "d20"], "Close DiceRoller"]
+        "dropdown": [["Add Dice >"] + dice_list, ["Remove Dice >"] + dice_list, "Close DiceRoller"],
     }, 
     "TextEditor": {
         "module": TextEditor,
-        "dropdown": ["Close TextEditor"]
+        "dropdown": ["Close TextEditor"],
     },
     "ImageViewer": {
         "module": ImageViewer,
-        "dropdown": image_files + ["Close ImageViewer"]
+        "dropdown": image_files + ["Close ImageViewer"],
     },
     "AudioPlayer": {
         "module": AudioPlayer,
-        "dropdown": sound_files + ["Close AudioPlayer"]
+        "dropdown": sound_files + ["Close AudioPlayer"],
     },
     # "DefaultTool": {
     #     "module": DefaultTool,
-    #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"]
+    #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"],
     # }, 
     # "InitiativeTracker": {
     #     "module": InitiativeTracker,
@@ -71,49 +75,60 @@ def main():
         else:
             for instruction in instructions:
                 if instruction is not None:
-                    if instruction[0].split(" ")[0] in ["mouse", "keyboard"]:
+                    if type(instruction[0]) == str and instruction[0].split(" ")[0] in ["mouse", "keyboard"]:
                         # give user input over to update
                         update_tools(instruction)
                     else:
-                        parent_app, app_instruction = instruction
+                        parent_app_id, app_instruction = instruction
                         if type(app_instruction) == str and app_instruction.split(' ')[0] == "Close":
-                            close_tool(parent_app)
+                            close_tool(parent_app_id)
                         else:
-                            match parent_app:
+                            match parent_app_id:
                                 case "Desktop":
                                     # we know that it's always going to be an open, until we decide to add more desktop options
                                     app_name = app_instruction.split(" ")[-1]
                                     load_tool(app_name)
                                 case _:
                                     # we can just feed the app the dropdown option that's been selected
-                                    run_tool(parent_app, [app_instruction, [parent_app]])
+                                    for tool in tools:
+                                        if tool.id == parent_app_id:
+                                            run_tool(tool, [app_instruction, [tool.id]])
+                                            break
         desktop.draw()
         desktop.clock.tick(desktop.fps)
 
 def load_tool(tool_name):
-    global desktop, tools
-    tools.append(tool_name)
+    global desktop, tools, tool_id
+    tool_info = possible_tools[tool_name]
+    tool_instance = App(tool_id, tool_name, tool_info["module"].application_icon, 
+                        tool_info["module"], tool_info["dropdown"])
+    tools.append(tool_instance)
     # the try will fail if no application icon is properly initialized
     try:
-        desktop.load_icon(tool_name, possible_tools[tool_name]["module"].application_icon)
+        desktop.load_icon(tool_id, possible_tools[tool_name]["module"].application_icon)
     except:
-        desktop.load_icon(tool_name)
-    desktop.open_app(tool_name)
+        desktop.load_icon(tool_id)
+    desktop.open_app(tool_id)
+    desktop.tool_list.append(tool_instance)
     # run initialization for that tool
-    possible_tools[tool_name]["module"].run_once()
+    # tool_info["module"].run_once()
+    tool_id += 1
 
-def close_tool(tool_name):
+def close_tool(tool_id):
     global tools
-    tools.remove(tool_name)
-    desktop.close_app(tool_name)
+    for tool in tools:
+        if tool.id == tool_id:
+            tools.remove(tool)
+            break
+    desktop.close_app(tool_id)
 
 def run_tool(app, instruction):
-    possible_tools[app]["module"].run(desktop.window_dict, instruction)
+    app.run(desktop.window_dict, instruction)
 
 def update_tools(desktop_logic=None):
-    for tool_name in tools: 
+    for tool in tools: 
         # maybe this could be changed s.t. it only feeds a non-None instruction to the specfic tool?
-        run_tool(tool_name, desktop_logic)
+        run_tool(tool, desktop_logic)
 
 if __name__ == "__main__":
     init()

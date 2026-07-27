@@ -14,7 +14,7 @@ debug = False
 clicking = False
 
 class Desktop:
-    def __init__(self, screen_size, tool_reference_table, in_debug_mode=False):
+    def __init__(self, screen_size, tool_dict, in_debug_mode=False):
         global debug
         debug = in_debug_mode
 
@@ -25,14 +25,16 @@ class Desktop:
         self.fps = 120
         self.bg_color = (63, 117, 102)
         self.clock = pygame.time.Clock()
+        
+        self.tool_dict = tool_dict
+        self.tool_list = []
 
         # task bar information
         self.task_bar_height_px = 25
         self.task_bar_color = (220,220,220)
         self.icons = {}
         self.dropdown_list = []
-        self.tool_reference_table = tool_reference_table # for handling dropdown options
-        self.main_dropdown = Dropdown("main", self.screen, font, (0, self.task_bar_height_px), [["Open App >"] + list(tool_reference_table), "Exit"])
+        self.main_dropdown = Dropdown("main", self.screen, font, (0, self.task_bar_height_px), [["Open App >"] + list(tool_dict), "Exit"])
         self.dropdown_path = ""
 
         # backend window management
@@ -161,20 +163,24 @@ class Desktop:
                     self.dropdown_list = []
                 else:
                     self.dropdown_list = [("Desktop", self.main_dropdown)]
-            for icon_name in list(self.icons):
-                icon = self.icons[icon_name]
+            for icon_id in list(self.icons):
+                icon = self.icons[icon_id]
                 icon_image, icon_location = icon
                 icon_rect = pygame.rect.Rect(*icon_location, icon_image.get_rect().width, icon_image.get_rect().height)
                 if self.inside_rect(icon_rect, cursor_position):
                     clicking = False
-                    app = icon_name
-                    self.dropdown_list = [(app, Dropdown(app, self.screen, font, [icon_location[0], self.task_bar_height_px], self.tool_reference_table[app]["dropdown"]))]
+                    app_id = icon_id
+                    app_name = None
+                    for tool in self.tool_list:
+                        if tool.id == app_id:
+                            app_name = tool.name
+                    self.dropdown_list = [(app_id, Dropdown(app_id, self.screen, font, [icon_location[0], self.task_bar_height_px], self.tool_dict[app_name]["dropdown"]))]
         return clicking
     
     def dropdown_clicking_logic(self, mouse_buttons, cursor_position, clicking):
         output = None
         for dropdown_info in self.dropdown_list:
-            parent_app, dropdown = dropdown_info
+            parent_app_id, dropdown = dropdown_info
             if self.inside_rect(dropdown.rect, cursor_position):
                 clicking = False
                 x = dropdown.clicking_logic(mouse_buttons, cursor_position)
@@ -191,7 +197,7 @@ class Desktop:
                                 # along with which menu options it has
                                 submenu = dropdown.create_submenu(dropdown_option)
                                 # then we can add it to the list
-                                self.dropdown_list.append((parent_app, submenu))
+                                self.dropdown_list.append((parent_app_id, submenu))
                                 if len(self.dropdown_path) == 0:
                                     self.dropdown_path = dropdown_option[0]
                                 else:
@@ -201,11 +207,11 @@ class Desktop:
                         self.dropdown_list = []
                         instruction = x
                         if len(self.dropdown_path) != 0:
-                            output = (parent_app, self.dropdown_path + " " + instruction)
+                            output = (parent_app_id, self.dropdown_path + " " + instruction)
                             self.dropdown_path = ""
                         else:
-                            output = (parent_app, instruction)
-                        match parent_app:
+                            output = (parent_app_id, instruction)
+                        match parent_app_id:
                             case "Desktop":
                                 if instruction == "Exit": 
                                     output = "stop"

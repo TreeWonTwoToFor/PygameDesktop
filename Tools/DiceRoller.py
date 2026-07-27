@@ -5,7 +5,6 @@ application_name = "DiceRoller"
 application_icon = "./icons/dice_icon.png"
 
 background_color = (100, 100, 100)
-canvas = None
 clicking = False
 
 pygame.font.init()
@@ -25,23 +24,24 @@ class Dice:
         return random.randint(1, self.num_sides)
 
 def run_once():
-    global total, dice_to_roll, button_dict
     total = 0
     dice_to_roll = []
     button_dict = {}
+    state = [total, dice_to_roll, button_dict]
+    return state
 
-def run(window_dict, desktop_instruction):
-    global canvas
-    canvas = window_dict[application_name].surface
+def run(id, state, canvas, desktop_instruction):
     if desktop_instruction is not None:
         event_type, event_details = desktop_instruction[0], desktop_instruction[1]
     else:
         event_type = None
         event_details = [None]
-    logic(event_type, event_details)
-    draw()
+    _, state = logic(event_type, event_details, id, state, canvas)
+    draw(canvas, state)
+    return state
 
-def draw():
+def draw(canvas, state):
+    total, dice_to_roll, button_dict = state
     canvas.fill(background_color)
     canvas_size = canvas.get_size()
     # write down the total value
@@ -77,10 +77,13 @@ def draw():
         # move down a row
         line_height += font_size + 5
 
-def logic(event_type, event_details):
-    global total, dice_to_roll, clicking
-    if event_details[-1] != application_name:
-        return
+def logic(event_type, event_details, id, state, canvas):
+    global clicking
+    total, dice_to_roll, button_dict = state
+    no_output = None, state
+    output = None
+    if event_details[-1] != id:
+        return no_output
     match event_type:
         case "mouse":
             if event_details[0] == "not clicking":
@@ -88,8 +91,8 @@ def logic(event_type, event_details):
             else:
                 buttons_pressed = event_details[0]
                 mouse_pos = event_details[1]
-                if not mouse_in_window(mouse_pos):
-                    return None
+                if not mouse_in_window(canvas, mouse_pos):
+                    return no_output
                 if not clicking: 
                     clicking = True
                     button_clicked = False
@@ -99,7 +102,7 @@ def logic(event_type, event_details):
                         if inside_rect(plus, mouse_pos):
                             button_clicked = True
                             dice_to_roll.append(Dice(button_sides))
-                            return
+                            return no_output
                         elif inside_rect(minus, mouse_pos):
                             button_clicked = True
                             for die in dice_to_roll:
@@ -107,8 +110,8 @@ def logic(event_type, event_details):
                                     dice_to_roll.remove(die)
                                     if die not in dice_to_roll:
                                         button_dict.pop(die.num_sides)
-                                    return
-                            return
+                                    return no_output
+                            return no_output
                     total = 0
                     if not button_clicked:
                         # roll the dice!
@@ -132,13 +135,15 @@ def logic(event_type, event_details):
                     for die in dice_to_roll:
                         if die.num_sides == number_of_sides:
                             dice_to_roll.remove(die)
-                            return
+                            return no_output
                 case _:
                     print("Event called:", event_type)
+    state = [total, dice_to_roll, button_dict]
+    return output, state
 
 # general utility functions
 
-def mouse_in_window(mouse_position):
+def mouse_in_window(canvas, mouse_position):
     canvas_size = canvas.get_size()
     if mouse_position[0] > 0 and mouse_position[0] <= canvas_size[0]:
         if mouse_position[1] > 0 and mouse_position[1] <= canvas_size[1]:
