@@ -1,7 +1,7 @@
 import os
 
 from Tools.App import App
-from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker
+from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker, Camera
 from Desktop import Desktop
 
 tool_id = 0
@@ -42,6 +42,10 @@ possible_tools = {
         "module": AudioPlayer,
         "dropdown": sound_files + ["Close AudioPlayer"],
     },
+    "Camera": {
+            "module": Camera,
+            "dropdown": ["Close Camera"],
+        },
     # "DefaultTool": {
     #     "module": DefaultTool,
     #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"],
