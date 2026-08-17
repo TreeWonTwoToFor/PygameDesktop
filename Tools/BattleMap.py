@@ -23,13 +23,8 @@ def run_once():
     color_palette = "stone"
     return [shape_option, color_palette] 
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    x = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    x = logic(id, state, canvas, instruction)
     if x is not None:
         state = x
     draw(canvas, state)
@@ -47,19 +42,19 @@ def draw(canvas, state):
         case "rectangle": draw_rectangle(canvas, outline_color, tile_color)
         case "circle": draw_circle(canvas, outline_color, tile_color)
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     global grid_size, clicking
     shape_option, color_palette = state
     grid_size = (canvas.get_width()-border)//tile_size[0], (canvas.get_height()-border)//tile_size[1]
-    if event_details[-1] != id:
+    if instruction is None or instruction.receiver != id:
         return
-    match event_type:
+    match instruction.type:
         case "mouse":
-            if event_details[0] == "not clicking":
+            if instruction.content == "not clicking":
                 clicking = False
             else:
-                buttons_pressed = event_details[0]
-                mouse_pos = event_details[1]
+                buttons_pressed = instruction.content[0]
+                mouse_pos = instruction.content[1]
                 if not mouse_in_window(canvas, mouse_pos):
                     return
                 # otherwise, perform mouse logic
@@ -67,13 +62,13 @@ def logic(event_type, event_details, id, state, canvas):
                     print("Buttons and pos:", buttons_pressed, mouse_pos)
                 clicking = True
         case "keyboard down":
-            key_pressed = event_details[0]
+            key_pressed = instruction.content[0]
             print("Key pressed:", key_pressed)
         case "keyboard up":
             pass
         case _:
             # here can be a list of the specific submenu options inside the dropdown for this app.
-            submenu_path = [x.strip() for x in event_type.split(">")]
+            submenu_path = [x.strip() for x in instruction.content.split(">")]
             match submenu_path[0]:
                 case "Shape":
                     if submenu_path[1] in ["Rectangle", "Circle"]:

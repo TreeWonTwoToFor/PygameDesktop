@@ -3,6 +3,7 @@ import os
 from Tools.App import App
 from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker, Camera
 from Desktop import Desktop
+from Message import Message
 
 tool_id = 0
 
@@ -77,13 +78,13 @@ def main():
         elif "stop" in instructions:
             running = False
         else:
-            for instruction in instructions:
-                if instruction is not None:
-                    if type(instruction[0]) == str and instruction[0].split(" ")[0] in ["mouse", "keyboard"]:
+            for message in instructions:
+                if message is not None:
+                    if message.type.split(" ")[0] in ["mouse", "keyboard"]:
                         # give user input over to update
-                        update_tools(instruction)
+                        update_tools(message)
                     else:
-                        parent_app_id, app_instruction = instruction
+                        parent_app_id, app_instruction = message.receiver, message.content
                         if type(app_instruction) == str and app_instruction.split(' ')[0] == "Close":
                             close_tool(parent_app_id)
                         else:
@@ -96,7 +97,8 @@ def main():
                                     # we can just feed the app the dropdown option that's been selected
                                     for tool in tools:
                                         if tool.id == parent_app_id:
-                                            run_tool(tool, [app_instruction, [tool.id]])
+                                            # run_tool(tool, [app_instruction, [tool.id]])
+                                            run_tool(tool, Message("Desktop", tool.id, "dropdown", app_instruction))
                                             break
         desktop.draw()
         desktop.clock.tick(desktop.fps)
@@ -124,8 +126,8 @@ def close_tool(tool_id):
             break
     desktop.close_app(tool_id)
 
-def run_tool(app, instruction):
-    app.run(desktop.window_dict, instruction)
+def run_tool(app, message):
+    app.run(desktop.window_dict, message)
 
 def update_tools(desktop_logic=None):
     for tool in tools: 

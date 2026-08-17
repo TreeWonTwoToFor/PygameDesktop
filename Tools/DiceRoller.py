@@ -30,13 +30,8 @@ def run_once():
     state = [total, dice_to_roll, button_dict]
     return state
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    _, state = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    _, state = logic(id, state, canvas, instruction)
     draw(canvas, state)
     return state
 
@@ -77,20 +72,20 @@ def draw(canvas, state):
         # move down a row
         line_height += font_size + 5
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     global clicking
     total, dice_to_roll, button_dict = state
     no_output = None, state
     output = None
-    if event_details[-1] != id:
+    if instruction is None or instruction.receiver != id:
         return no_output
-    match event_type:
+    match instruction.type:
         case "mouse":
-            if event_details[0] == "not clicking":
+            if instruction.content == "not clicking":
                 clicking = False
             else:
-                buttons_pressed = event_details[0]
-                mouse_pos = event_details[1]
+                buttons_pressed = instruction.content[0]
+                mouse_pos = instruction.content[1]
                 if not mouse_in_window(canvas, mouse_pos):
                     return no_output
                 if not clicking: 
@@ -123,7 +118,7 @@ def logic(event_type, event_details, id, state, canvas):
         case "keyboard up":
             pass
         case _:
-            submenu_path = [x.strip() for x in event_type.split(">")]
+            submenu_path = [x.strip() for x in instruction.content.split(">")]
             match submenu_path[0]:
                 case "Add Dice":
                     dice_kind = submenu_path[1]
@@ -137,7 +132,7 @@ def logic(event_type, event_details, id, state, canvas):
                             dice_to_roll.remove(die)
                             return no_output
                 case _:
-                    print("Event called:", event_type)
+                    print("Event called:", instruction.content)
     state = [total, dice_to_roll, button_dict]
     return output, state
 

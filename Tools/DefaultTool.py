@@ -10,33 +10,28 @@ def run_once():
     state = []
     return state
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    logic_output, state = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
     return state
 
 def draw(canvas, state, logic_output):
     canvas.fill(background_color)
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     global clicking
     no_output = None, state
     output = None
     # keep track of the state throughout the logic
-    if event_details[-1] != id:
+    if instruction == None or instruction.receiver != id:
         return no_output
-    match event_type:
+    match instruction.type:
         case "mouse":
-            if event_details[0] == "not clicking":
+            if instruction.content == "not clicking":
                 clicking = False
             else:
-                buttons_pressed = event_details[0]
-                mouse_pos = event_details[1]
+                buttons_pressed = instruction.content[0]
+                mouse_pos = instruction.content[1]
                 if not mouse_in_window(canvas, mouse_pos):
                     return no_output
                 # otherwise, perform mouse logic
@@ -44,22 +39,22 @@ def logic(event_type, event_details, id, state, canvas):
                     print("Buttons and pos:", buttons_pressed, mouse_pos)
                 clicking = True
         case "keyboard down":
-            key_pressed = event_details[0]
+            key_pressed = instruction.content
             match key_pressed:
                 case _:
                     print("Key pressed:", key_pressed)
         case "keyboard up":
-            key_pressed = event_details[0]
+            key_pressed = instruction.content
             match key_pressed:
                 case _:
                     print("Key released:", key_pressed)
-        case _:
+        case "dropdown":
             # here can be a list of the specific submenu options inside the dropdown for this app.
-            submenu_path = [x.strip() for x in event_type.split(">")]
+            submenu_path = [x.strip() for x in instruction.content.split(">")]
             print(submenu_path)
-            match event_type:
+            match instruction.type:
                 case _:
-                    print("Event called:", event_type)
+                    print("Event called:", instruction.content)
     return output, state
 
 def mouse_in_window(canvas, mouse_position):

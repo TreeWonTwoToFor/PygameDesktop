@@ -31,13 +31,8 @@ def run_once():
     state = [playing, audio_path, button_list]
     return state
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    logic_output, state = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
     return state
 
@@ -52,20 +47,20 @@ def draw(canvas, state, logic_output):
         canvas.blit(button, button_pos)
         button_pos[0] += button.get_rect()[0] + offset
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     global clicking
     playing, audio_path, button_list = state
     no_output = None, state
     output = None
-    if event_details[-1] != id:
+    if instruction is None or instruction.receiver != id:
         return no_output
-    match event_type:
+    match instruction.type:
         case "mouse":
-            if event_details[0] == "not clicking":
+            if instruction.content == "not clicking":
                 clicking = False
             else:
-                buttons_pressed = event_details[0]
-                mouse_pos = event_details[1]
+                buttons_pressed = instruction.content[0]
+                mouse_pos = instruction.content[1]
                 if not mouse_in_window(canvas, mouse_pos):
                     return no_output
                 # otherwise, perform mouse logic
@@ -80,14 +75,17 @@ def logic(event_type, event_details, id, state, canvas):
                     #             toggle_play()
                 clicking = True
         case "keyboard down":
-            if event_details[0] == "space":
+            print(instruction.content)
+            if instruction.content == "space":
                 playing, button_list = toggle_play(playing, button_list)
         case "keyboard up":
             pass
         case _:
-            match event_type:
+            print(instruction.type, instruction.content)
+            match instruction.content:
                 case _:
-                    audio_path = event_type
+                    print(instruction.content)
+                    audio_path = instruction.content
                     audio.load(audio_path)
     state = [playing, audio_path, button_list]
     return output, state

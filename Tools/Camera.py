@@ -14,13 +14,8 @@ def run_once():
     state = [camera]
     return state
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    logic_output, state = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
     return state
 
@@ -33,7 +28,7 @@ def draw(canvas, state, logic_output):
     camera_frame = pygame.transform.flip(pygame.transform.scale(pygame.transform.rotate(camera_frame, 270), canvas.get_size()), 1, 0)
     canvas.blit(camera_frame, (0,0))
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     global clicking
     no_output = None, state
     return no_output

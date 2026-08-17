@@ -47,13 +47,8 @@ def run_once():
     state = [text_list, held_keys, old_held_keys, delayed_auto_type]
     return state
 
-def run(id, state, canvas, desktop_instruction):
-    if desktop_instruction is not None:
-        event_type, event_details = desktop_instruction[0], desktop_instruction[1]
-    else:
-        event_type = None
-        event_details = [None]
-    logic_output, state = logic(event_type, event_details, id, state, canvas)
+def run(id, state, canvas, instruction):
+    logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
 
 def draw(canvas, state, logic_output):
@@ -72,21 +67,21 @@ def draw(canvas, state, logic_output):
     else:
         canvas.blit(cursor, (10, 10))
 
-def logic(event_type, event_details, id, state, canvas):
+def logic(id, state, canvas, instruction):
     # global clicking, text_list, held_keys, old_held_keys, delayed_auto_type
     global clicking
     text_list, held_keys, old_held_keys, delayed_auto_type = state
     no_output = None, state
     output = None
     old_held_keys = copy.deepcopy(held_keys)
-    if event_details[-1] == id:
-        match event_type:
+    if instruction is not None and instruction.receiver == id:
+        match instruction.type:
             case "mouse":
-                if event_details[0] == "not clicking":
+                if instruction.content == "not clicking":
                     clicking = False
                 else:
-                    buttons_pressed = event_details[0]
-                    mouse_pos = event_details[1]
+                    buttons_pressed = instruction.content[0]
+                    mouse_pos = instruction.content[1]
                     # print("Default tool event details:", event_details)
                     if not mouse_in_window(canvas, mouse_pos):
                         return no_output
@@ -95,21 +90,21 @@ def logic(event_type, event_details, id, state, canvas):
                         pass
                     clicking = True
             case "keyboard down":
-                key_pressed = event_details[0]
+                key_pressed = instruction.content
                 if key_pressed not in held_keys:
                     held_keys.append(key_pressed)
             case "keyboard up":
-                key_pressed = event_details[0]
+                key_pressed = instruction.content
                 if key_pressed in held_keys:
                     held_keys.remove(key_pressed)
             case _:
                 # here can be a list of the specific submenu options inside the dropdown for this app.
-                submenu_path = [x.strip() for x in event_type.split(">")]
+                submenu_path = [x.strip() for x in instruction.content.split(">")]
                 print(submenu_path)
-                match event_type:
+                match instruction.type:
                     case _:
                         # currently has no other options, so it goes unusued
-                        print("Event called:", event_type)
+                        print("Event called:", instruction.content)
     # handling held keys
     pressed_new_key = False
     if len(old_held_keys) > 0 and len(held_keys) > 0:

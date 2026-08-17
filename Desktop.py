@@ -3,6 +3,7 @@ import time
 import pygame
 from Window import Window
 from Dropdown import Dropdown
+from Message import Message
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
@@ -120,18 +121,20 @@ class Desktop:
     def logic(self):
         global debug, clicking
         # handling the pygame events 
-        output = []
+        message_list = []
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
-                    output.append("stop")
+                    message_list.append("stop")
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        output.append("stop")
+                        message_list.append("stop")
                     else:
-                        output.append(["keyboard down", (pygame.key.name(event.key), self.focused_window)])
+                        message = Message("Desktop", self.focused_window, "keyboard down", pygame.key.name(event.key))
+                        message_list.append(message)
                 case pygame.KEYUP:
-                    output.append(["keyboard up", (pygame.key.name(event.key), self.focused_window)])
+                    message = Message("Desktop", self.focused_window, "keyboard up", pygame.key.name(event.key))
+                    message_list.append(message)
                 case pygame.MOUSEBUTTONDOWN:
                     clicking = True
                 case pygame.MOUSEBUTTONUP:
@@ -140,7 +143,9 @@ class Desktop:
                     for app in self.application_order:
                         window = self.window_dict[app]
                         window.normalize()
-                    output.append(["mouse", ("not clicking", self.focused_window)])
+                    message = Message("Desktop", self.focused_window, "mouse", "not clicking")
+                    # ["mouse", ("not clicking", self.focused_window)]
+                    message_list.append(message)
         # handling mouse interactions
         if clicking:
             mouse_buttons = pygame.mouse.get_pressed()
@@ -148,12 +153,12 @@ class Desktop:
             clicking = self.taskbar_clicking_logic(mouse_buttons, cursor_position, clicking)
             clicking, instruction = self.dropdown_clicking_logic(mouse_buttons, cursor_position, clicking)
             if instruction is not None:
-                output.append(instruction)
+                message_list.append(instruction)
             # general sceen space
             elif self.inside_screen(cursor_position) and clicking:
                 self.dropdown_list = []
-                output.append(self.window_clicking_logic(mouse_buttons, cursor_position))
-        return output
+                message_list.append(self.window_clicking_logic(mouse_buttons, cursor_position))
+        return message_list
 
     def taskbar_clicking_logic(self, mouse_buttons, cursor_position, clicking):
         if self.inside_taskbar(cursor_position):
@@ -207,10 +212,12 @@ class Desktop:
                         self.dropdown_list = []
                         instruction = x
                         if len(self.dropdown_path) != 0:
-                            output = (parent_app_id, self.dropdown_path + " " + instruction)
+                            # output = (parent_app_id, self.dropdown_path + " " + instruction)
+                            output = Message("Desktop", parent_app_id, "dropdown", self.dropdown_path + ' ' + instruction)
                             self.dropdown_path = ""
                         else:
-                            output = (parent_app_id, instruction)
+                            # output = (parent_app_id, instruction)
+                            output = Message("Desktop", parent_app_id, "dropdown", instruction)
                         match parent_app_id:
                             case "Desktop":
                                 if instruction == "Exit": 
@@ -250,7 +257,8 @@ class Desktop:
                 app_location = self.window_dict[app].location
                 x = (cursor_position[0]-app_location[0], cursor_position[1]-app_location[1])
                 relative_location = x
-        return ["mouse", (mouse_buttons, relative_location, self.focused_window)]
+        # return ["mouse", (mouse_buttons, relative_location, self.focused_window)]
+        return Message("Desktop", self.focused_window, "mouse", (mouse_buttons, relative_location))
 
     def inside_rect(self, rectangle, xy):
         x, y = xy[0], xy[1]
