@@ -28,7 +28,7 @@ def run(id, state, canvas, instruction):
     if x is not None:
         state = x
     draw(canvas, state)
-    return state
+    return {"state": state}
 
 def draw(canvas, state):
     shape_option, color_palette = state[0], state[1]

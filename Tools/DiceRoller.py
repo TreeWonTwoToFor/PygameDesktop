@@ -33,7 +33,7 @@ def run_once():
 def run(id, state, canvas, instruction):
     _, state = logic(id, state, canvas, instruction)
     draw(canvas, state)
-    return state
+    return {"state": state}
 
 def draw(canvas, state):
     total, dice_to_roll, button_dict = state

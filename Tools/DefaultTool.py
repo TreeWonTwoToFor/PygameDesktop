@@ -1,3 +1,5 @@
+from Message import Message
+
 application_name = "DefaultTool"
 application_icon = "./icons/default_icon.png"
 
@@ -12,8 +14,14 @@ def run_once():
 
 def run(id, state, canvas, instruction):
     logic_output, state = logic(id, state, canvas, instruction)
+    instructions = []
+    if logic_output == "test instruction":
+        instructions.append(Message(application_name, "BattleMap", "dropdown", "Shape > Circle"))
     draw(canvas, state, logic_output)
-    return state
+    return {
+        "state": state,
+        "instructions": instructions
+    }
 
 def draw(canvas, state, logic_output):
     canvas.fill(background_color)
@@ -41,6 +49,8 @@ def logic(id, state, canvas, instruction):
         case "keyboard down":
             key_pressed = instruction.content
             match key_pressed:
+                case "space":
+                    output = "test instruction"
                 case _:
                     print("Key pressed:", key_pressed)
         case "keyboard up":

@@ -17,7 +17,7 @@ def run_once():
 def run(id, state, canvas, instruction):
     logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
-    return state
+    return {"state": state}
 
 def draw(canvas, state, logic_output):
     canvas.fill(background_color)

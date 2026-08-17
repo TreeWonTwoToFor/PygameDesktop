@@ -29,7 +29,7 @@ def run_once():
     # UI interface
     button_list = [("pause", pause_button)]
     state = [playing, audio_path, button_list]
-    return state
+    return {"state": state}
 
 def run(id, state, canvas, instruction):
     logic_output, state = logic(id, state, canvas, instruction)

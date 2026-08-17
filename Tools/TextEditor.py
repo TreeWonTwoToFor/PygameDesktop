@@ -45,7 +45,7 @@ def run_once():
     old_held_keys = []
     delayed_auto_type = 0
     state = [text_list, held_keys, old_held_keys, delayed_auto_type]
-    return state
+    return {"state": state}
 
 def run(id, state, canvas, instruction):
     logic_output, state = logic(id, state, canvas, instruction)

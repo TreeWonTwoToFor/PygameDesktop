@@ -35,7 +35,9 @@ class Desktop:
         self.task_bar_color = (220,220,220)
         self.icons = {}
         self.dropdown_list = []
-        self.main_dropdown = Dropdown("main", self.screen, font, (0, self.task_bar_height_px), [["Open App >"] + list(tool_dict), "Exit"])
+        temp = list(tool_dict)
+        temp.sort()
+        self.main_dropdown = Dropdown("main", self.screen, font, (0, self.task_bar_height_px), [["Open App >"] + temp, "Exit"])
         self.dropdown_path = ""
 
         # backend window management

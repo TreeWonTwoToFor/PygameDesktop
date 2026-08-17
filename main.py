@@ -126,13 +126,26 @@ def close_tool(tool_id):
             break
     desktop.close_app(tool_id)
 
-def run_tool(app, message):
-    app.run(desktop.window_dict, message)
+def run_tool(app, instruction):
+    return app.run(desktop.window_dict, instruction)
 
-def update_tools(desktop_logic=None):
+def update_tools(desktop_instruction=None):
+    tool_instructions = []
     for tool in tools: 
-        # maybe this could be changed s.t. it only feeds a non-None instruction to the specfic tool?
-        run_tool(tool, desktop_logic)
+        x = run_tool(tool, desktop_instruction)
+        if x is not None:
+            # we can have a list of instructions
+            for y in x:
+                tool_instructions.append(y)
+    if len(tool_instructions) > 0: print(tool_instructions)
+    for tool in tools: 
+        for instruction in tool_instructions:
+            print(instruction)
+            # ignoring chain reaction instructions from this level
+            if instruction.receiver == tool.name:
+                # we need to adjust the id so that it properly reads it
+                modified_instruction = Message(instruction.sender, tool.id, instruction.type, instruction.content)
+                run_tool(tool, modified_instruction)
 
 if __name__ == "__main__":
     init()

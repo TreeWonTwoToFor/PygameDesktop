@@ -12,4 +12,9 @@ class App:
         canvas = desktop_window_dict[self.id].surface
         output = self.module.run(self.id, self.state, canvas, desktop_instruction)
         if output is not None:
-            self.state = output
+            self.state = output["state"]
+            if "instructions" in output.keys():
+                # ensures that the instruction(s) are in a list
+                if type(output["instructions"]) != list:
+                    return [output["instructions"]]
+                return output["instructions"]
