@@ -1,4 +1,5 @@
 import os
+import json
 
 from Tools.App import App
 from Tools import BattleMap, DiceRoller, TextEditor, ImageViewer, AudioPlayer, DefaultTool, InitiativeTracker, Camera
@@ -47,10 +48,10 @@ possible_tools = {
             "module": Camera,
             "dropdown": ["Close Camera"],
         },
-    # "DefaultTool": {
-    #     "module": DefaultTool,
-    #     "dropdown": [["Hello, >", "World!"], "Close DefaultTool"],
-    # }, 
+    "DefaultTool": {
+        "module": DefaultTool,
+        "dropdown": [["Hello, >", "World!"], "Close DefaultTool"],
+    }, 
     # "InitiativeTracker": {
     #     "module": InitiativeTracker,
     #     "dropdown": ["Close InitiativeTracker"]
@@ -58,13 +59,27 @@ possible_tools = {
 }
 tools = []
 
-def init():
+def init(file=None):
     global desktop
     desktop = Desktop((1000,750), possible_tools)
     initial_tools = []
+    initial_sizes = []
+    initial_positions = []
+
+    if file is not None:
+        with open(file, 'r') as f:
+            start_config = json.load(f)
+            for program in start_config["programs"]:
+                initial_tools.append(program["name"])
+                initial_sizes.append(program["size"])
+                initial_positions.append(program["position"])
+
     # initialize each tool individually, so that it can properly manage canvases
-    for tool in initial_tools:
-        load_tool(tool)
+    for i in range(len(initial_tools)):
+        tool_name = initial_tools[i]
+        tool_size = initial_sizes[i]
+        tool_pos = initial_positions[i]
+        load_tool(tool_name, tool_size, tool_pos)
     desktop.application_order.reverse()
 
 def main():
@@ -103,7 +118,7 @@ def main():
         desktop.draw()
         desktop.clock.tick(desktop.fps)
 
-def load_tool(tool_name):
+def load_tool(tool_name, tool_size=None, tool_position=None):
     global desktop, tools, tool_id
     tool_info = possible_tools[tool_name]
     tool_instance = App(tool_id, tool_name, tool_info["module"].application_icon, 
@@ -114,7 +129,7 @@ def load_tool(tool_name):
         desktop.load_icon(tool_id, possible_tools[tool_name]["module"].application_icon)
     except:
         desktop.load_icon(tool_id)
-    desktop.open_app(tool_id)
+    desktop.open_app(tool_id, tool_size, tool_position)
     desktop.tool_list.append(tool_instance)
     tool_id += 1
 
@@ -148,5 +163,8 @@ def update_tools(desktop_instruction=None):
                 run_tool(tool, modified_instruction)
 
 if __name__ == "__main__":
-    init()
+    init("start_config.json")
+    # init()
     main()
+    for w in list(desktop.window_dict):
+        print(desktop.window_dict[w])

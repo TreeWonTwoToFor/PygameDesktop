@@ -46,8 +46,8 @@ class Desktop:
         self.selected_window = None
         self.focused_window = None
 
-    def open_app(self, application_name):
-        self.request_window(application_name)
+    def open_app(self, application_name, application_size, application_location):
+        self.request_window(application_name, application_size, application_location)
         self.application_order.insert(0, application_name)
         
     def close_app(self, application_name):
@@ -60,10 +60,16 @@ class Desktop:
             self.icons[app] = (self.icons[app][0], icon_location)
             num_icons += 1
 
-    def request_window(self, application_name):
-        offset = 1 + len(self.application_order)
-        screen_location = (50 * offset, 50 * offset)
-        canvas_size = (400, 300)
+    def request_window(self, application_name, application_size, application_location):
+        if application_location == None:
+            offset = 1 + len(self.application_order)
+            screen_location = (50 * offset, 50 * offset)
+        else:
+            screen_location = application_location
+        if application_size == None:
+            canvas_size = (400, 300)
+        else:
+            canvas_size = application_size
         self.window_dict[application_name] = Window(application_name, pygame.Surface(canvas_size), screen_location)
 
     def resize_window(self, application_name):
@@ -82,7 +88,10 @@ class Desktop:
     
     def load_icon(self, app_name, icon_path="./icons/default_icon.png"):
         icon = pygame.transform.scale(pygame.image.load(icon_path), (self.task_bar_height_px-3, self.task_bar_height_px-3))
-        icon_location = [self.main_dropdown.button_rect.width+10 + (self.task_bar_height_px + 2) * len(self.icons), 2]
+        try:
+            icon_location = [self.main_dropdown.button_rect.width+10 + (self.task_bar_height_px + 2) * len(self.icons), 2]
+        except:
+            icon_location = [95 + (self.task_bar_height_px + 2) * len(self.icons),2]
         self.icons[app_name] = (icon, icon_location)
 
     def draw(self):

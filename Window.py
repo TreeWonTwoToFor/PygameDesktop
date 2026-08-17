@@ -26,6 +26,9 @@ class Window:
 
         self.debug = False
 
+    def __str__(self):
+        return f"{self.name} - Size: {self.size}, Location: {self.location}"
+
     def draw(self, screen):
         bars = self.get_window_bars()
         title_bar, border, corners, long_bars = bars[0], bars[1], bars[2], bars[3]
