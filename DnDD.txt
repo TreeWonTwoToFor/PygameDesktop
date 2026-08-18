@@ -34,3 +34,4 @@ Here's a list of ideas for apps that I want to have as options.
 Desktop improvements:
 1. being able to handle multiple events at once, as it currently just returns out on most events ✓
     a. now can handle multiple events through creating a list, and handing that off to each application.
+2. Programs can now communicate with each other, along with codifying a stronger system for explaining instructions between the Desktop and programs

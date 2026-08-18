@@ -65,21 +65,28 @@ def init(file_name=None):
     initial_tools = []
     initial_sizes = []
     initial_positions = []
+    initial_states = []
 
     if file_name is not None:
         with open(file_name, 'r') as f:
-            start_config = json.load(f)
-            for program in start_config["programs"]:
-                initial_tools.append(program["name"])
-                initial_sizes.append(program["size"])
-                initial_positions.append(program["position"])
+            try:
+                start_config = json.load(f)
+                for program in start_config["programs"]:
+                    initial_tools.append(program["name"])
+                    initial_sizes.append(program["size"])
+                    initial_positions.append(program["position"])
+                    initial_states.append(program["state"])
+            except:
+                with open(file_name, 'w') as w:
+                    w.write(json.dumps({"programs": []}))
 
     # initialize each tool individually, so that it can properly manage canvases
     for i in range(len(initial_tools)):
         tool_name = initial_tools[i]
         tool_size = initial_sizes[i]
         tool_pos = initial_positions[i]
-        load_tool(tool_name, tool_size, tool_pos)
+        tool_state = initial_states[i]
+        load_tool(tool_name, tool_size, tool_pos, tool_state)
     desktop.application_order.reverse()
 
 def main():
@@ -118,11 +125,13 @@ def main():
         desktop.draw()
         desktop.clock.tick(desktop.fps)
 
-def load_tool(tool_name, tool_size=None, tool_position=None):
+def load_tool(tool_name, tool_size=None, tool_position=None, tool_state=None):
     global desktop, tools, tool_id
     tool_info = possible_tools[tool_name]
     tool_instance = App(tool_id, tool_name, tool_info["module"].application_icon, 
                         tool_info["module"], tool_info["dropdown"])
+    if tool_state is not None:
+        tool_instance.state = tool_state
     tools.append(tool_instance)
     # the try will fail if no application icon is properly initialized
     try:
@@ -174,10 +183,12 @@ if __name__ == "__main__":
         name = tools[i].name
         size = desktop.window_dict[w].size
         pos = desktop.window_dict[w].location
+        state = tools[i].state
 
-        saved_tool_list["programs"].append({"name": name, "size": size, "position": pos})
-        print(desktop.window_dict[w])
-        print(tools[i].name)
+        saved_tool_list["programs"].append({"name": name, "size": size, "position": pos, "state": state})
+        # print(desktop.window_dict[w])
+        # print(tools[i].name)
+        # print(state)
 
     with open("start_config.json", 'w') as file:
         file.write(json.dumps(saved_tool_list))
