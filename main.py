@@ -59,15 +59,15 @@ possible_tools = {
 }
 tools = []
 
-def init(file=None):
+def init(file_name=None):
     global desktop
     desktop = Desktop((1000,750), possible_tools)
     initial_tools = []
     initial_sizes = []
     initial_positions = []
 
-    if file is not None:
-        with open(file, 'r') as f:
+    if file_name is not None:
+        with open(file_name, 'r') as f:
             start_config = json.load(f)
             for program in start_config["programs"]:
                 initial_tools.append(program["name"])
@@ -163,8 +163,21 @@ def update_tools(desktop_instruction=None):
                 run_tool(tool, modified_instruction)
 
 if __name__ == "__main__":
-    init("start_config.json")
-    # init()
+    # config options go as a parameter into init()
+    init("start_config.json") 
     main()
-    for w in list(desktop.window_dict):
+
+    saved_tool_list = {"programs": []}
+    # this is only used to codify configs
+    for i in range(len(list(desktop.window_dict))):
+        w = list(desktop.window_dict)[i]
+        name = tools[i].name
+        size = desktop.window_dict[w].size
+        pos = desktop.window_dict[w].location
+
+        saved_tool_list["programs"].append({"name": name, "size": size, "position": pos})
         print(desktop.window_dict[w])
+        print(tools[i].name)
+
+    with open("start_config.json", 'w') as file:
+        file.write(json.dumps(saved_tool_list))
