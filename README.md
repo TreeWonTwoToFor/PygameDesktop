@@ -1,1 +1,3 @@
 This is a desktop like application written in Python using the pygame library for handling keyboard, mouse, and display. It's original purpose was as a table top display to be used during Dungeons and Dragons games, but is designed to be an all purpose desktop manager.
+
+![Screenshot of the desktop](./README-images/Desktop_image.png "Desktop Screenshot")
