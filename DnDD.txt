@@ -24,15 +24,17 @@ Here's a list of ideas for apps that I want to have as options.
 4. NPC information holder/tracker
 5. notepad for writing down information ✓
     a. it's very basic as of right now, but it does work. should be improved with multi-event handling ✓
-    b. I think that having the ability to load in files to open and edit would be cool
+    b. I think that having the ability to load in files to open and edit would be cool ✓
 6. Media playback features
     a. Image Viewer ✓
     b. Video player
         1. Seems like there's some good open source options that I can use, rather than homebrewing my own.
     c. Audio player ✓
         1. needs a slightly better ui
+7. Drawing application
+    a. something to quickly doodle would be nice
 
 Desktop improvements:
 1. being able to handle multiple events at once, as it currently just returns out on most events ✓
     a. now can handle multiple events through creating a list, and handing that off to each application.
-2. Programs can now communicate with each other, along with codifying a stronger system for explaining instructions between the Desktop and programs
+2. Programs can now communicate with each other, along with codifying a stronger system for explaining instructions between the Desktop and programs ✓
