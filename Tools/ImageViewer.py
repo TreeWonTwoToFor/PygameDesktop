@@ -1,30 +1,36 @@
 import pygame
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
+tk.Tk().withdraw()
 
 application_name = "ImageViewer"
-application_icon = "./icons/default_icon.png"
+application_icon = "./icons/image_icon.png"
 
-background_color = (255,255,255)
+background_color = (50,50,100)
 
 clicking = False
 
 def run_once():
     # any initialization should go in there, in order to keep the state fresh every time the tool is opened.
-    image_path = "./media/caught_in_the_act.png"
+    image_path = ""
     state = [image_path]
     return state
 
 def run(id, state, canvas, instruction):
+    if state[0] != "" and len(state) == 1:
+        state.append(pygame.image.load(state[0]))
     logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
+    return {"state": state}
 
 def draw(canvas, state, logic_output):
     image_path = state[0]
-    image = pygame.image.load(image_path)
     canvas.fill(background_color)
-    image = pygame.transform.scale(image, canvas.get_size())
-    canvas.blit(image, (0,0))
-    # image.resize(canvas.get_size())
-    # image.draw(canvas)
+    if len(state) == 1:
+        pass
+    else:
+        image = pygame.transform.scale(state[1], canvas.get_size())
+        canvas.blit(image, (0,0))
 
 def logic(id, state, canvas, instruction):
     global clicking
@@ -40,9 +46,14 @@ def logic(id, state, canvas, instruction):
             pass
         case "keyboard up":
             pass
-        case _:
-            match instruction.type:
-                case _:
-                    image_path = instruction.content
+        case "dropdown":
+            if instruction.content == "Open":
+                image_path = askopenfilename()
+                image = pygame.image.load(image_path)
+                if len(state) == 1: 
+                    state.append(image)
+                else:
+                    state[1] = image
+                # image_path = instruction.content
     state[0] = image_path
     return output, state

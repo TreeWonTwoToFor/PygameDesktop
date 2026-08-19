@@ -1,4 +1,3 @@
-import os
 import json
 
 from Tools.App import App
@@ -7,19 +6,6 @@ from Desktop import Desktop
 from Message import Message
 
 tool_id = 0
-
-media_dir = "./media/"
-media_files = [f for f in os.listdir(media_dir) if os.path.isfile(os.path.join(media_dir, f))]
-sound_files, image_files, video_files = [], [], []
-for file in media_files:
-    file_ext = file.split('.')[-1]
-    match file_ext:
-        case "png" | "jpg" | "gif":
-            file_path = media_dir + file
-            image_files.append(file_path)
-        case "mp3" | "wav":
-            file_path = media_dir + file
-            sound_files.append(file_path)
 
 dice_list = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"]
 
@@ -38,11 +24,11 @@ possible_tools = {
     },
     "ImageViewer": {
         "module": ImageViewer,
-        "dropdown": image_files + ["Close ImageViewer"],
+        "dropdown": ["Open", "Close ImageViewer"],
     },
     "AudioPlayer": {
         "module": AudioPlayer,
-        "dropdown": sound_files + ["Close AudioPlayer"],
+        "dropdown": ["Open", "Close AudioPlayer"],
     },
     "Camera": {
             "module": Camera,
@@ -130,6 +116,7 @@ def load_tool(tool_name, tool_size=None, tool_position=None, tool_state=None):
     tool_info = possible_tools[tool_name]
     tool_instance = App(tool_id, tool_name, tool_info["module"].application_icon, 
                         tool_info["module"], tool_info["dropdown"])
+    # FIXME: if the audioplayer has a different file, it won't properly load the audio in.
     if tool_state is not None:
         tool_instance.state = tool_state
     tools.append(tool_instance)
@@ -185,7 +172,15 @@ if __name__ == "__main__":
         pos = desktop.window_dict[w].location
         state = tools[i].state
 
-        saved_tool_list["programs"].append({"name": name, "size": size, "position": pos, "state": state})
+        filtered_state = []
+        for x in state:
+            print(x)
+            if type(x) not in [bool, str, int, float, list, dict]:
+                print(f"Could not process {x} with type {type(x)}")
+            else:
+                filtered_state.append(x)
+
+        saved_tool_list["programs"].append({"name": name, "size": size, "position": pos, "state": filtered_state})
         # print(desktop.window_dict[w])
         # print(tools[i].name)
         # print(state)

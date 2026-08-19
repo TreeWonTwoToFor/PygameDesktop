@@ -2,7 +2,7 @@ import pygame
 import copy
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-tk.Tk().withdraw() # part of the import if you are not using other tkinter functions
+tk.Tk().withdraw()
 
 application_name = "TextEditor"
 application_icon = "./icons/notepad_icon.png"
@@ -102,25 +102,23 @@ def logic(id, state, canvas, instruction):
             case "dropdown":
                 # here can be a list of the specific submenu options inside the dropdown for this app.
                 submenu_path = [x.strip() for x in instruction.content.split(">")]
-                match instruction.content:
-                    case "Open":
-                        try:
+                try:
+                    match instruction.content:
+                        case "Open":
                             fn = askopenfilename()
                             with open(fn, 'r') as text_file:
                                 text = text_file.read()
                             text_list = text.split('\n')
-                        except:
-                            raise FileNotFoundError("Couldn't properly select file.")
-                    case "Save":
-                        try:
+                        case "Save":
                             text = '\n'.join(text_list)
                             fn = askopenfilename()
                             with open(fn, 'w') as text_file:
                                 text_file.write(text)
-                        except:
-                            raise FileNotFoundError("Couldn't properly select file.")
-                    case "Clear Text":
-                        text_list = ['']
+                        case "Clear Text":
+                            text_list = ['']
+                except:
+                    # FIXME: This is too general. Should better specify/handle issues w/o crashing
+                    raise FileNotFoundError("Couldn't properly select file.")
     # handling held keys
     pressed_new_key = False
     if len(old_held_keys) > 0 and len(held_keys) > 0:

@@ -1,7 +1,10 @@
 import pygame
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
+tk.Tk().withdraw()
 
 application_name = "AudioPlayer"
-application_icon = "./icons/default_icon.png"
+application_icon = "./icons/audio_icon.png"
 
 background_color = (75,75,75)
 
@@ -15,8 +18,10 @@ text_color = (255,255,255)
 
 audio = pygame.mixer.music
 button_size = (64, 64)
-play_button = pygame.image.load("./icons/play_button.png")
-pause_button = pygame.image.load("./icons/pause_button.png")
+button_dict = {
+    "play": pygame.image.load("./icons/play_button.png"),
+    "pause": pygame.image.load("./icons/pause_button.png")
+}
 
 def run_once():
     playing = False
@@ -27,7 +32,7 @@ def run_once():
     audio.play()
     audio.pause()
     # UI interface
-    button_list = [("pause", pause_button)]
+    button_list = ["pause"]
     state = [playing, audio_path, button_list]
     return state
 
@@ -39,11 +44,13 @@ def run(id, state, canvas, instruction):
 def draw(canvas, state, logic_output):
     audio_path, button_list = state[1], state[2]
     canvas.fill(background_color)
-    audio_name = font.render(audio_path.split('/')[-1], True, text_color)
+    audio_text = audio_path.split('/')[-1].split('.')[:1][0]
+    audio_name = font.render(audio_text, True, text_color)
     audio_name_location = 0,0
     canvas.blit(audio_name, audio_name_location)
     button_pos = [offset, audio_name.get_height() + offset]
-    for button_name, button in button_list:
+    for button_name in button_list:
+        button = button_dict[button_name]
         canvas.blit(button, button_pos)
         button_pos[0] += button.get_rect()[0] + offset
 
@@ -75,18 +82,17 @@ def logic(id, state, canvas, instruction):
                     #             toggle_play()
                 clicking = True
         case "keyboard down":
-            print(instruction.content)
             if instruction.content == "space":
                 playing, button_list = toggle_play(playing, button_list)
         case "keyboard up":
             pass
-        case _:
-            print(instruction.type, instruction.content)
-            match instruction.content:
-                case _:
-                    print(instruction.content)
-                    audio_path = instruction.content
-                    audio.load(audio_path)
+        case "dropdown":
+            if instruction.content == "Open":
+                audio_path = askopenfilename()
+                audio.load(audio_path)
+                audio.play()
+                if playing == False:
+                    audio.pause()
     state = [playing, audio_path, button_list]
     return output, state
 
@@ -94,19 +100,15 @@ def toggle_play(playing, button_list):
     playing = not playing
     if playing:
         audio.unpause()
-        for button in button_list:
-            if button[0] == "pause":
-                old_index = button_list.index(button)
-                button_list.remove(button)
-                button_list.insert(old_index, ("play", play_button))
+        for i in range(len(button_list)):
+            if button_list[i] == "pause":
+                button_list[i] = "play"
                 break
     else:
         audio.pause()
-        for button in button_list:
-            if button[0] == "play":
-                old_index = button_list.index(button)
-                button_list.remove(button)
-                button_list.insert(old_index, ("pause", pause_button))
+        for i in range(len(button_list)):
+            if button_list[i] == "play":
+                button_list[i] = "pause"
                 break
     return playing, button_list
 
