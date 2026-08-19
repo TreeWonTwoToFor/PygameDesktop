@@ -34,7 +34,7 @@ possible_tools = {
     }, 
     "TextEditor": {
         "module": TextEditor,
-        "dropdown": ["Close TextEditor"],
+        "dropdown": ["Open", "Save", "Clear Text", "Close TextEditor"],
     },
     "ImageViewer": {
         "module": ImageViewer,

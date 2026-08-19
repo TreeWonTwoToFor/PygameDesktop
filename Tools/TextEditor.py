@@ -1,5 +1,8 @@
 import pygame
 import copy
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
+tk.Tk().withdraw() # part of the import if you are not using other tkinter functions
 
 application_name = "TextEditor"
 application_icon = "./icons/notepad_icon.png"
@@ -50,6 +53,7 @@ def run_once():
 def run(id, state, canvas, instruction):
     logic_output, state = logic(id, state, canvas, instruction)
     draw(canvas, state, logic_output)
+    return {"state": state}
 
 def draw(canvas, state, logic_output):
     text_list = state[0]
@@ -68,7 +72,6 @@ def draw(canvas, state, logic_output):
         canvas.blit(cursor, (10, 10))
 
 def logic(id, state, canvas, instruction):
-    # global clicking, text_list, held_keys, old_held_keys, delayed_auto_type
     global clicking
     text_list, held_keys, old_held_keys, delayed_auto_type = state
     no_output = None, state
@@ -82,7 +85,6 @@ def logic(id, state, canvas, instruction):
                 else:
                     buttons_pressed = instruction.content[0]
                     mouse_pos = instruction.content[1]
-                    # print("Default tool event details:", event_details)
                     if not mouse_in_window(canvas, mouse_pos):
                         return no_output
                     # otherwise, perform mouse logic
@@ -97,14 +99,28 @@ def logic(id, state, canvas, instruction):
                 key_pressed = instruction.content
                 if key_pressed in held_keys:
                     held_keys.remove(key_pressed)
-            case _:
+            case "dropdown":
                 # here can be a list of the specific submenu options inside the dropdown for this app.
                 submenu_path = [x.strip() for x in instruction.content.split(">")]
-                print(submenu_path)
-                match instruction.type:
-                    case _:
-                        # currently has no other options, so it goes unusued
-                        print("Event called:", instruction.content)
+                match instruction.content:
+                    case "Open":
+                        try:
+                            fn = askopenfilename()
+                            with open(fn, 'r') as text_file:
+                                text = text_file.read()
+                            text_list = text.split('\n')
+                        except:
+                            raise FileNotFoundError("Couldn't properly select file.")
+                    case "Save":
+                        try:
+                            text = '\n'.join(text_list)
+                            fn = askopenfilename()
+                            with open(fn, 'w') as text_file:
+                                text_file.write(text)
+                        except:
+                            raise FileNotFoundError("Couldn't properly select file.")
+                    case "Clear Text":
+                        text_list = ['']
     # handling held keys
     pressed_new_key = False
     if len(old_held_keys) > 0 and len(held_keys) > 0:

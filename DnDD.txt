@@ -24,6 +24,7 @@ Here's a list of ideas for apps that I want to have as options.
 4. NPC information holder/tracker
 5. notepad for writing down information ✓
     a. it's very basic as of right now, but it does work. should be improved with multi-event handling ✓
+    b. I think that having the ability to load in files to open and edit would be cool
 6. Media playback features
     a. Image Viewer ✓
     b. Video player
